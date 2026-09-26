@@ -1,0 +1,6 @@
+.git
+.gitignore
+**/data
+**/tmp
+*.zip
+*.exe

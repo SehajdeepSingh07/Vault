@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Vault distributed object storage dashboard">
+  <meta name="color-scheme" content="dark">
+  <title>Vault — Distributed Object Storage</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">VAULT</div>
+      <h1>Distributed Object Storage</h1>
+      <p id="headline">API-first cluster control plane and recovery dashboard</p>
+    </div>
+    <div class="actions">
+      <div class="detail"><span class="k">API</span><span class="v" id="apiBase">—</span></div>
+      <button id="refreshBtn">Refresh</button>
+      <span id="lastUpdated">—</span>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="stats" id="stats"></section>
+
+    <section class="grid two">
+      <article class="card">
+        <div class="card-head"><h2>Cluster</h2><span id="clusterBadge" class="badge">—</span></div>
+        <div id="clusterTable" class="table-wrap"></div>
+      </article>
+
+      <article class="card">
+        <div class="card-head"><h2>Consensus</h2><span id="raftBadge" class="badge">—</span></div>
+        <div id="raftPanel" class="detail-list"></div>
+      </article>
+    </section>
+
+    <section class="grid two">
+      <article class="card">
+        <div class="card-head"><h2>Object operations</h2><span class="muted">data plane</span></div>
+        <form id="uploadForm" class="form">
+          <label>Object key<input id="objectKey" required placeholder="examples/demo.txt" autocomplete="off"></label>
+          <label>File<input id="objectFile" type="file" required></label>
+          <button type="submit">Upload object</button>
+        </form>
+        <div class="row">
+          <input id="lookupKey" placeholder="Object key" autocomplete="off">
+          <button id="headBtn">Inspect</button>
+          <button id="downloadBtn" class="secondary">Download</button>
+          <button id="deleteBtn" class="danger">Delete</button>
+        </div>
+        <pre id="objectResult" class="console"></pre>
+      </article>
+
+      <article class="card">
+        <div class="card-head"><h2>Recovery</h2><span class="muted">integrity + repair</span></div>
+        <div id="recoveryPanel" class="detail-list"></div>
+        <div class="row">
+          <input id="repairKey" placeholder="Object key" autocomplete="off">
+          <button id="repairBtn">Repair</button>
+          <button id="scrubBtn" class="secondary">Scrub</button>
+        </div>
+        <pre id="repairResult" class="console"></pre>
+      </article>
+    </section>
+
+    <section class="grid two">
+      <article class="card">
+        <div class="card-head"><h2>Fault injection</h2><span id="faultBadge" class="badge">disabled</span></div>
+        <div class="row">
+          <select id="faultPeer"></select>
+          <button id="partitionBtn" class="danger">Partition</button>
+          <button id="clearFaultBtn" class="secondary">Clear</button>
+        </div>
+        <pre id="faultResult" class="console"></pre>
+      </article>
+
+      <article class="card">
+        <div class="card-head"><h2>Rebalancing</h2><span class="muted">placement</span></div>
+        <div id="rebalancePanel" class="detail-list"></div>
+        <div class="row">
+          <button id="rebalanceBtn">Rebalance cluster</button>
+          <span id="rebalanceMsg" class="muted"></span>
+        </div>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Active metadata</h2><span class="muted">committed object state</span></div>
+      <div id="metadataTable" class="table-wrap"></div>
+    </section>
+
+    <section class="card log-card">
+      <div class="card-head"><h2>Event log</h2><button id="clearLogBtn" class="secondary">Clear</button></div>
+      <div id="log" class="log"></div>
+    </section>
+  </main>
+
+  <script src="./config.js"></script>
+  <script src="./api.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

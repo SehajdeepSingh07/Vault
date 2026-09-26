@@ -1,0 +1,10 @@
+$env:VAULT_ADDR = "127.0.0.1:8080"
+$env:VAULT_NODE_ID = "node-1"
+$env:VAULT_NODE_ADDRESS = "http://127.0.0.1:8080"
+$env:VAULT_DATA_DIR = Join-Path $PSScriptRoot "backend\data"
+$env:VAULT_CORS_ORIGINS = "http://127.0.0.1:3000,http://localhost:3000"
+$env:VAULT_INTERNAL_TOKEN = "dev-only-change-me"
+$env:VAULT_REPLICATION_FACTOR = "1"
+$env:VAULT_WRITE_QUORUM = "1"
+$env:VAULT_READ_QUORUM = "1"
+& (Join-Path $PSScriptRoot "backend\bin\vaultd.exe")

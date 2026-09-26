@@ -1,0 +1,218 @@
+openapi: 3.0.3
+info:
+  title: Vault Distributed Object Storage API
+  version: 1.0.0-mvp
+  description: |
+    Public API for the Vault distributed object-storage engine. The frontend is
+    intentionally separate and depends only on this versioned API.
+servers:
+  - url: http://127.0.0.1:8080
+    description: Local node
+paths:
+  /:
+    get:
+      summary: Service information
+      responses:
+        '200':
+          description: Service metadata
+  /v1/version:
+    get:
+      summary: API version
+      responses:
+        '200':
+          description: Version information
+  /v1/health:
+    get:
+      summary: Node and cluster health
+      responses:
+        '200':
+          description: Health snapshot
+  /v1/node:
+    get:
+      summary: Local node information
+      responses:
+        '200':
+          description: Node information
+  /v1/cluster:
+    get:
+      summary: Cluster membership and failure state
+      responses:
+        '200':
+          description: Cluster snapshot
+  /v1/raft:
+    get:
+      summary: Raft state
+      responses:
+        '200':
+          description: Raft snapshot
+  /v1/objects/{key}:
+    parameters:
+      - $ref: '#/components/parameters/ObjectKey'
+    put:
+      summary: Create or replace an object
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+          '*/*':
+            schema:
+              type: string
+              format: binary
+      responses:
+        '201':
+          description: Object committed
+        '503':
+          description: Write quorum unavailable
+    get:
+      summary: Read an object
+      responses:
+        '200':
+          description: Object bytes
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '206':
+          description: Partial object response
+        '404':
+          description: Object not found
+        '503':
+          description: Read quorum unavailable
+    head:
+      summary: Inspect object metadata
+      responses:
+        '200':
+          description: Object headers
+        '404':
+          description: Object not found
+    delete:
+      summary: Delete an object
+      responses:
+        '204':
+          description: Deleted
+  /v1/metadata:
+    get:
+      summary: List active metadata
+      responses:
+        '200':
+          description: Active metadata records
+  /v1/metadata/{key}:
+    parameters:
+      - $ref: '#/components/parameters/ObjectKey'
+    get:
+      summary: Read object metadata
+      responses:
+        '200':
+          description: Metadata record
+        '404':
+          description: Not found
+    put:
+      summary: Commit metadata record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [size, sha256]
+              properties:
+                size: { type: integer, format: int64 }
+                sha256: { type: string }
+                content_type: { type: string }
+      responses:
+        '200':
+          description: Metadata record
+        '409':
+          description: Not leader
+    delete:
+      summary: Delete metadata
+      responses:
+        '204':
+          description: Deleted
+  /v1/integrity:
+    get:
+      summary: Integrity state and quarantines
+      responses:
+        '200':
+          description: Integrity snapshot
+  /v1/integrity/{key}:
+    parameters:
+      - $ref: '#/components/parameters/ObjectKey'
+    get:
+      summary: Scrub one object
+      responses:
+        '200': { description: Integrity report }
+        '207': { description: Corrupt or missing replicas found }
+    post:
+      summary: Scrub one object immediately
+      responses:
+        '200': { description: Integrity report }
+        '207': { description: Corrupt or missing replicas found }
+  /v1/repair:
+    get:
+      summary: Repair statistics
+      responses:
+        '200': { description: Repair statistics }
+  /v1/repair/{key}:
+    parameters:
+      - $ref: '#/components/parameters/ObjectKey'
+    get:
+      summary: Read current metadata for repair inspection
+      responses:
+        '200': { description: Metadata record }
+    post:
+      summary: Repair a single object
+      responses:
+        '200': { description: Repaired metadata record }
+  /v1/rebalance:
+    get:
+      summary: Rebalance statistics
+      responses:
+        '200': { description: Rebalance statistics }
+    post:
+      summary: Rebalance all objects
+      responses:
+        '200': { description: Rebalance result }
+  /v1/rebalance/{key}:
+    parameters:
+      - $ref: '#/components/parameters/ObjectKey'
+    post:
+      summary: Rebalance one object
+      responses:
+        '200': { description: Rebalance result }
+  /v1/faults:
+    get:
+      summary: Fault injection state
+      responses:
+        '200': { description: Fault state }
+        '404': { description: Fault injection disabled }
+    post:
+      summary: Add or clear a network fault (development/demo feature)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action: { type: string, enum: [partition, clear] }
+                peer_id: { type: string }
+                peers:
+                  type: array
+                  items: { type: string }
+      responses:
+        '200': { description: Updated fault state }
+components:
+  parameters:
+    ObjectKey:
+      name: key
+      in: path
+      required: true
+      description: URL-encoded object key
+      schema:
+        type: string

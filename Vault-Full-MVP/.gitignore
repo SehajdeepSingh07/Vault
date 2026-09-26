@@ -1,0 +1,5 @@
+/data/
+*.obj
+*.tmp
+bin-debug/
+.vscode/
